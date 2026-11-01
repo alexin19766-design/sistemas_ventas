@@ -5,7 +5,7 @@ st.set_page_config(page_title="Registro de Ventas", page_icon="🛒")
 st.title("🛒 Registrar Nueva Venta")
 
 # ⚠️ OJO: Aquí debes pegar el link de tu backend en Render cuando lo crees más adelante
-URL_BACKEND = "https://TU-LINK-DE-RENDER.onrender.com"
+URL_BACKEND = "https://api-ventas-backend-2rq9.onrender.com"
 
 with st.form("formulario_venta"):
     producto = st.text_input("Nombre del Producto")
