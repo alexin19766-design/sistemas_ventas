@@ -7,7 +7,7 @@ from sklearn.linear_model import LinearRegression
 st.set_page_config(page_title="Dashboard Inteligente", page_icon="🧠", layout="wide")
 st.title("🧠 Centro de Inteligencia de Ventas")
 
-URL_BACKEND = "https://api-ventas-backend-2rq9.onrender.com" # <-- Revisa que tu link esté aquí
+URL_BACKEND = "https://api-ventas-backend-2rq9.onrender.com" 
 
 # --- CONTROL INTERACTIVO EN LA BARRA LATERAL ---
 with st.sidebar:
@@ -17,9 +17,9 @@ with st.sidebar:
         min_value=1, 
         max_value=99, 
         value=30, 
-        help="Ajusta este valor para calcular tu margen de ganancia estimado sobre las ventas."
+        help="Ajusta este valor para calcular tu margen de ganancia estimado."
     )
-    st.info(f"Actualmente estás calculando un margen del **{margen_estimado}%** sobre cada venta.")
+    st.info(f"Calculando un margen del **{margen_estimado}%**.")
 
 if st.button("🔄 Actualizar Datos"):
     st.rerun()
@@ -35,8 +35,6 @@ try:
             df['fecha'] = pd.to_datetime(df['fecha'])
             df['mes'] = df['fecha'].dt.strftime('%B')
             
-            # --- CÁLCULO DINÁMICO DEL MARGEN ---
-            # Calculamos el costo y el margen basado en el slider
             df['costo'] = df['monto'] * (1 - (margen_estimado / 100))
             df['margen'] = df['monto'] - df['costo']
 
@@ -47,33 +45,29 @@ try:
             col3.metric("Ventas Realizadas", len(df))
 
             # --- CREACIÓN DE PESTAÑAS ---
-            tab1, tab2, tab3, tab4 = st.tabs(["📊 Demanda y Ventas", "📈 Pronóstico (IA)", "💰 Márgenes", "🏆 Rendimiento"])
+            tab1, tab2, tab3, tab4 = st.tabs(["📊 Ventas", "📈 Pronóstico (IA)", "💰 Márgenes", "🏆 Rendimiento"])
 
-            # PESTAÑA 1: DEMANDA Y VENTAS
-with tab1:
-    st.subheader("Ventas por Producto (Unidades)")
-    # Cuenta cuántas unidades se vendieron de cada producto
-    ventas_unidades = df["producto"].value_counts()
-    st.bar_chart(ventas_unidades)
-    
-    st.subheader("Ingresos por Producto (Dinero)")
-    # Suma el dinero total que generó cada producto
-    ingresos_producto = df.groupby("producto")["monto"].sum().sort_values(ascending=False)
-    st.bar_chart(ingresos_producto)
-    
-    st.subheader("Ingresos por Día")
-    ventas_dia = df.groupby(df['fecha'].dt.date)["monto"].sum()
-    st.line_chart(ventas_dia)
-            # PESTAÑA 2: PRONÓSTICO CON MACHINE LEARNING
+            # PESTAÑA 1: VENTAS
+            with tab1:
+                st.subheader("Ventas por Producto (Unidades)")
+                ventas_unidades = df["producto"].value_counts()
+                st.bar_chart(ventas_unidades)
+                
+                st.subheader("Ingresos por Producto (Dinero)")
+                ingresos_producto = df.groupby("producto")["monto"].sum().sort_values(ascending=False)
+                st.bar_chart(ingresos_producto)
+                
+                st.subheader("Ingresos por Día")
+                ventas_dia = df.groupby(df['fecha'].dt.date)["monto"].sum()
+                st.line_chart(ventas_dia)
+
+            # PESTAÑA 2: PRONÓSTICO
             with tab2:
                 st.subheader("🔮 Pronóstico de Ventas (Próximos 7 días)")
-                st.write("Este modelo usa regresión lineal para predecir cuánto venderás basándose en tu historial.")
-                
                 df_diario = df.groupby(df['fecha'].dt.date)["monto"].sum().reset_index()
                 
                 if len(df_diario) >= 3:
                     df_diario['dia_num'] = np.arange(len(df_diario))
-                    
                     X = df_diario[['dia_num']]
                     y = df_diario['monto']
                     modelo = LinearRegression()
@@ -86,19 +80,17 @@ with tab1:
                     df_pred = pd.DataFrame({'fecha': fechas_futuras, 'monto_predicho': prediccion})
                     
                     st.line_chart(df_pred.set_index('fecha')['monto_predicho'])
-                    st.info(f"💡 **Orientación:** La IA estima que en los próximos 7 días podrías facturar alrededor de **Q {prediccion.sum():,.2f}**.")
+                    st.info(f"💡 **Orientación:** La IA estima que podrías facturar **Q {prediccion.sum():,.2f}**.")
                 else:
-                    st.warning("⚠️ Necesitas al menos 3 días de ventas registradas para que la IA pueda generar un pronóstico.")
+                    st.warning("⚠️ Necesitas al menos 3 días de ventas para generar un pronóstico.")
 
             # PESTAÑA 3: MÁRGENES
             with tab3:
                 st.subheader(f"Margen de Ganancia por Producto (al {margen_estimado}%)")
                 margen_prod = df.groupby("producto")["margen"].sum().sort_values(ascending=False)
                 st.bar_chart(margen_prod, color="#00FF00")
-                
-                st.info("💡 Si conoces el costo exacto de cada producto, puedes cambiar el porcentaje en el menú de la izquierda para hacer un análisis más preciso.")
 
-            # PESTAÑA 4: RENDIMIENTO (MEJORES/PEORES)
+            # PESTAÑA 4: RENDIMIENTO
             with tab4:
                 col_a, col_b = st.columns(2)
                 with col_a:
@@ -120,8 +112,8 @@ with tab1:
                     st.bar_chart(ventas_vend)
 
         else:
-            st.info("Aún no hay ventas registradas en el sistema.")
+            st.info("Aún no hay ventas registradas.")
     else:
-        st.error("No se pudo conectar a la base de datos central.")
+        st.error("No se pudo conectar a la base de datos.")
 except Exception as e:
     st.error(f"Error de conexión: {e}")
