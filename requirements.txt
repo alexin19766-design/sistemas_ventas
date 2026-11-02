@@ -6,3 +6,5 @@ psycopg2-binary
 streamlit
 requests
 pandas
+scikit-learn
+plotly
