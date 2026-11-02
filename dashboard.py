@@ -50,15 +50,20 @@ try:
             tab1, tab2, tab3, tab4 = st.tabs(["📊 Demanda y Ventas", "📈 Pronóstico (IA)", "💰 Márgenes", "🏆 Rendimiento"])
 
             # PESTAÑA 1: DEMANDA Y VENTAS
-            with tab1:
-                st.subheader("Demanda por Producto")
-                demanda = df.groupby("producto")["monto"].sum().sort_values(ascending=False)
-                st.bar_chart(demanda)
-                
-                st.subheader("Ventas por Día")
-                ventas_dia = df.groupby(df['fecha'].dt.date)["monto"].sum()
-                st.line_chart(ventas_dia)
-
+with tab1:
+    st.subheader("Ventas por Producto (Unidades)")
+    # Cuenta cuántas unidades se vendieron de cada producto
+    ventas_unidades = df["producto"].value_counts()
+    st.bar_chart(ventas_unidades)
+    
+    st.subheader("Ingresos por Producto (Dinero)")
+    # Suma el dinero total que generó cada producto
+    ingresos_producto = df.groupby("producto")["monto"].sum().sort_values(ascending=False)
+    st.bar_chart(ingresos_producto)
+    
+    st.subheader("Ingresos por Día")
+    ventas_dia = df.groupby(df['fecha'].dt.date)["monto"].sum()
+    st.line_chart(ventas_dia)
             # PESTAÑA 2: PRONÓSTICO CON MACHINE LEARNING
             with tab2:
                 st.subheader("🔮 Pronóstico de Ventas (Próximos 7 días)")
