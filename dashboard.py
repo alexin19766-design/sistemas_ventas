@@ -6,8 +6,7 @@ st.set_page_config(page_title="Dashboard en Vivo", page_icon="📈")
 st.title("📈 Panel de Control en Tiempo Real")
 
 # ⚠️ OJO: Aquí también debes pegar el link de tu backend en Render
-URL_BACKEND = "https://api-ventas-backend-2rq9.onrender.com
-"
+URL_BACKEND = "https://api-ventas-backend-2rq9.onrender.com"
 
 if st.button("🔄 Actualizar Datos"):
     st.rerun()
